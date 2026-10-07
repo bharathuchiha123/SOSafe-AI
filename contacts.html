@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Contacts - SOSafe</title>
+  <meta name="description" content="Manage your trusted emergency contacts and responders with Supabase cloud database synchronization.">
+  
+  <!-- Favicon / PNG Icon -->
+  <link rel="icon" type="image/png" href="assets/icons/icon.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-512.png">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Disclaimer Banner -->
+  <div class="demo-disclaimer-bar" data-i18n="disclaimer_text">
+    ⚠️ Frontend Demo Mode: All alerts, GPS tracking & notifications are simulated locally.
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="navbar-wrapper">
+    <div class="container">
+      <nav class="navbar" aria-label="Contacts Navigation">
+        
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">
+            <img src="assets/icons/icon.png" alt="SOSafe Logo">
+          </div>
+          <span>SO<span class="brand-safe">Safe</span></span>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link" data-i18n="nav_home">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link" data-i18n="nav_dashboard">Dashboard</a></li>
+          <li><a href="location.html" class="nav-link" data-i18n="nav_location">Live Location</a></li>
+          <li><a href="contacts.html" class="nav-link active" data-i18n="nav_contacts">Emergency Contacts</a></li>
+          <li><a href="profile.html" class="nav-link" data-i18n="nav_profile">Profile</a></li>
+          <li><a href="settings.html" class="nav-link" data-i18n="nav_settings">Settings</a></li>
+        </ul>
+
+        <div class="nav-controls">
+          <!-- Language Selector -->
+          <div class="lang-switcher" aria-label="Language Selector">
+            <div class="lang-icon">🌐</div>
+            <button type="button" class="lang-btn active" data-lang="en">EN</button>
+            <button type="button" class="lang-btn" data-lang="ta">தமிழ்</button>
+            <button type="button" class="lang-btn" data-lang="tanglish">Tanglish</button>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Theme">
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </button>
+
+          <!-- User Avatar & Logout -->
+          <div class="nav-user-profile">
+            <a href="profile.html" class="user-avatar-badge" id="navUserAvatar" title="View Profile">U</a>
+            <span id="navUserName" style="font-size:0.9rem; font-weight:700; color:#F8F3EA; display:none;">User</span>
+            <button type="button" class="btn-logout" id="btnLogout" data-i18n="nav_logout">Logout</button>
+          </div>
+
+          <button type="button" class="menu-toggle-btn" id="menuToggleBtn" aria-label="Open Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+        </div>
+
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay">
+    <div class="mobile-nav-drawer">
+      <ul class="mobile-nav-links">
+        <li><a href="index.html" class="mobile-nav-link" data-i18n="nav_home">Home</a></li>
+        <li><a href="dashboard.html" class="mobile-nav-link" data-i18n="nav_dashboard">Dashboard</a></li>
+        <li><a href="location.html" class="mobile-nav-link" data-i18n="nav_location">Live Location</a></li>
+        <li><a href="contacts.html" class="mobile-nav-link active" data-i18n="nav_contacts">Emergency Contacts</a></li>
+        <li><a href="profile.html" class="mobile-nav-link" data-i18n="nav_profile">Profile</a></li>
+        <li><a href="settings.html" class="mobile-nav-link" data-i18n="nav_settings">Settings</a></li>
+      </ul>
+      <div>
+        <button type="button" class="btn-primary" id="btnDrawerAddContact" style="width:100%; justify-content:center; margin-bottom:0.75rem;" data-i18n="contacts_btn_add">+ Add Contact</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Contacts Content -->
+  <main class="container" style="padding-top:2.5rem; padding-bottom:5rem;">
+    
+    <!-- Safety Circle Capacity HUD -->
+    <div class="circle-capacity-hud">
+      <div class="circle-capacity-meta">
+        <div class="circle-radar-icon">👥</div>
+        <div>
+          <h2 class="circle-hud-title" data-i18n="contacts_title">Emergency Contacts</h2>
+          <p class="circle-hud-subtitle" data-i18n="contacts_sub">Add up to 4 emergency contacts — each stored in its own dedicated table (emergency_contact1 .. emergency_contact4) with your user ID.</p>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+        <div class="circle-slots-tracker">
+          <span class="slot-dot" id="dot1"></span>
+          <span class="slot-dot" id="dot2"></span>
+          <span class="slot-dot" id="dot3"></span>
+          <span class="slot-dot" id="dot4"></span>
+        </div>
+        <span class="dash-safety-pill" id="contactsCountBadge" style="font-size:0.9rem; padding:0.4rem 1.15rem;">0 / 4 Active</span>
+        <button type="button" class="btn-primary" id="btnOpenAddModal">
+          + <span data-i18n="contacts_btn_add">Add Contact</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 4 Contacts Limit Warning Banner -->
+    <div class="limit-warning-banner" id="limitWarningBanner">
+      <span>🛡️</span>
+      <span data-i18n="contacts_limit_warning">You can add up to 4 emergency contacts.</span>
+    </div>
+
+    <!-- Minimum 2 Contacts Requirement / Onboarding Banner -->
+    <div id="minContactsAlertBanner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; padding:0.9rem 1.25rem; background:rgba(208,63,116,0.12); border:1.5px solid var(--c-berry-rose); border-radius:var(--radius-lg); margin-bottom:1.5rem;">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <span style="font-size:1.4rem;" id="minContactsBannerIcon">⚠️</span>
+        <div>
+          <strong style="color:var(--text-primary); font-size:0.95rem;" id="minContactsBannerTitle">At least 2 Emergency Contacts Required</strong>
+          <div style="font-size:0.82rem; color:var(--text-secondary);" id="minContactsBannerDesc">Please add 2 to 4 contacts so that your SOS automation can notify guardians during emergencies.</div>
+        </div>
+      </div>
+      <a href="dashboard.html" id="btnProceedToDashboard" class="btn-primary-sm" style="display:none; text-decoration:none; padding:0.6rem 1.25rem; font-size:0.85rem; font-weight:800; background:var(--c-berry-rose); color:#FFF; border-radius:var(--radius-md);">
+        🚀 Proceed to SOS Dashboard ➔
+      </a>
+    </div>
+
+    <!-- 🌟 View & Scrolling Option Toolbar with Slot Jump Pills -->
+    <div class="contacts-view-toolbar">
+      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <div class="view-mode-toggle">
+          <button type="button" class="view-toggle-btn active" id="btnViewScroll">
+            <span>🎴</span> <span data-i18n="scroll_view_btn">Scroll View</span>
+          </button>
+          <button type="button" class="view-toggle-btn" id="btnViewGrid">
+            <span>⊞</span> <span data-i18n="grid_view_btn">Grid View</span>
+          </button>
+        </div>
+
+        <!-- Quick Slot Jump Pills -->
+        <div class="contacts-scroll-pills" id="contactsScrollPills">
+          <button type="button" class="scroll-pill-btn active" data-slot="0">Slot 01</button>
+          <button type="button" class="scroll-pill-btn" data-slot="1">Slot 02</button>
+          <button type="button" class="scroll-pill-btn" data-slot="2">Slot 03</button>
+          <button type="button" class="scroll-pill-btn" data-slot="3">Slot 04</button>
+        </div>
+      </div>
+
+      <!-- Arrow Scroll Controls -->
+      <div class="scroll-nav-arrows" id="scrollNavControls">
+        <button type="button" class="btn-scroll-arrow" id="btnScrollLeft" aria-label="Scroll Left" title="Previous Contact">◀</button>
+        <button type="button" class="btn-scroll-arrow" id="btnScrollRight" aria-label="Scroll Right" title="Next Contact">▶</button>
+      </div>
+    </div>
+
+    <!-- 4 Slots Grid & Scroll Deck Container -->
+    <div class="contacts-carousel-deck">
+      <div class="contacts-grid scroll-mode" id="contactsGrid">
+        <!-- Dynamically generated 4 contact slots -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 🌟 Add / Edit Contact Modal with Prominent Save Option -->
+  <div class="modal-backdrop" id="contactModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <h3 id="contactModalTitle" style="font-size:1.45rem; font-weight:900;" data-i18n="contact_modal_add_title">Add Emergency Contact</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseModal" title="Close Modal">✕</button>
+      </div>
+
+      <form id="contactModalForm" style="display:flex; flex-direction:column; gap:1.35rem;">
+        <input type="hidden" id="contactIdInput">
+
+        <!-- 1. Contact Name Chamber Fill-Out Box -->
+        <div class="form-section-card">
+          <div class="form-section-header">
+            <span class="form-section-title">
+              👤 Contact Name
+            </span>
+            <div class="live-avatar-preview" id="modalLiveAvatarPreview">C</div>
+          </div>
+          <div class="form-input-chamber" id="nameChamber">
+            <div class="chamber-icon">👤</div>
+            <input type="text" id="contactNameInput" class="chamber-input" placeholder="e.g. Amma / Mom / Karthik" required autocomplete="off">
+            <span class="chamber-valid-icon" id="nameValidIcon">✓</span>
+          </div>
+          <span class="form-field-helper">Legal name or family role to identify in SOS alerts</span>
+        </div>
+
+        <!-- 2. Phone Chamber Fill-Out Box -->
+        <div class="form-section-card">
+          <div class="form-section-header">
+            <span class="form-section-title" style="color:var(--c-gold);">
+              📱 Phone Number (SMS & Calls)
+            </span>
+            <span style="font-size:0.75rem; color:#4CAF50; font-weight:800;">● Live SOS Broadcast</span>
+          </div>
+          <div class="form-input-chamber" id="phoneChamber">
+            <div class="chamber-icon">📞</div>
+            <div class="chamber-country-tag">🇮🇳 +91</div>
+            <input type="tel" id="contactPhoneInput" class="chamber-input" placeholder="98765 43210" required autocomplete="tel">
+            <span class="chamber-valid-icon" id="phoneValidIcon">✓</span>
+          </div>
+          <span class="form-field-helper">SMS dispatch & real-time GPS beacon link will be routed to this number</span>
+        </div>
+
+        <!-- 3. Relationship Tile Matrix -->
+        <div class="form-section-card">
+          <div class="form-section-header">
+            <span class="form-section-title" style="color:var(--text-primary);">
+              🏷️ Safety Designation
+            </span>
+          </div>
+          <input type="hidden" id="contactRelationInput" value="Parent / Family">
+          <div class="relation-chips-grid" id="relationChipsContainer">
+            <button type="button" class="relation-chip-btn active" data-rel="Parent / Family">👨‍👩‍👧 Family</button>
+            <button type="button" class="relation-chip-btn" data-rel="Spouse / Partner">💍 Spouse</button>
+            <button type="button" class="relation-chip-btn" data-rel="Sibling">👥 Sibling</button>
+            <button type="button" class="relation-chip-btn" data-rel="Close Friend">🤝 Friend</button>
+            <button type="button" class="relation-chip-btn" data-rel="Guardian">🛡️ Guardian</button>
+            <button type="button" class="relation-chip-btn" data-rel="Doctor / Hospital">🏥 Doctor</button>
+          </div>
+        </div>
+
+        <!-- 🌟 PROMINENT SAVE CONTACT SUBMIT ACTION BAR -->
+        <div class="modal-save-bar">
+          <div class="modal-save-buttons-row">
+            <button type="button" class="btn-modal-cancel" id="btnCancelModal" data-i18n="contact_modal_cancel">
+              ✕ Cancel
+            </button>
+            <button type="submit" class="btn-save-contact-submit" id="btnSaveModal" data-i18n="contact_modal_save">
+              <span>💾</span>
+              <span id="btnSaveModalLabel">Save Contact</span>
+            </button>
+          </div>
+          <span class="save-hint-subtext">💡 Quick Tip: You can also press <strong>Enter ↵</strong> on your keyboard to instantly save.</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteConfirmModal">
+    <div class="modal-card" style="max-width:440px; text-align:center;">
+      <div style="font-size:2.8rem; margin-bottom:0.75rem;">🗑️</div>
+      <h3 style="font-size:1.4rem; font-weight:900; margin-bottom:0.5rem;" data-i18n="contact_delete_confirm_title">Remove Contact</h3>
+      <p style="font-size:0.95rem; color:var(--text-secondary); line-height:1.5; margin-bottom:1.75rem;" data-i18n="contact_delete_confirm_msg">
+        Are you sure you want to remove this emergency contact?
+      </p>
+
+      <div style="display:flex; gap:0.75rem; justify-content:center;">
+        <button type="button" class="btn-secondary" id="btnCancelDelete" style="flex:1;" data-i18n="contact_modal_cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="btnConfirmDelete" style="flex:1; background:var(--c-deep-red);" data-i18n="contact_btn_delete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notice -->
+  <div class="toast-notice" id="contactsToast"></div>
+
+  <!-- Scripts -->
+  <script src="js/language.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/contacts.js"></script>
+</body>
+</html>

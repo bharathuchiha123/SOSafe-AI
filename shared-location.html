@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Live Location - SOSafe</title>
+  <meta name="description" content="View real-time live emergency tracking transmitted by an SOSafe user.">
+  
+  <!-- Favicon / PNG Icon -->
+  <link rel="icon" type="image/png" href="assets/icons/icon.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-512.png">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    .shared-guardian-header {
+      background: var(--bg-surface);
+      border: 2px solid var(--c-coral-blossom);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 24px rgba(93, 45, 62, 0.08);
+    }
+    [data-theme="dark"] .shared-guardian-header {
+      background: #3A1B28;
+    }
+    .shared-badge-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(208, 63, 116, 0.15);
+      border: 1.5px solid var(--c-berry-rose);
+      color: var(--c-berry-rose);
+      padding: 0.45rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.88rem;
+      font-weight: 900;
+      animation: badge-pulse 2s infinite ease-in-out;
+    }
+    .shared-badge-inactive {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(76, 175, 80, 0.15);
+      border: 1.5px solid #4CAF50;
+      color: #4CAF50;
+      padding: 0.45rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.88rem;
+      font-weight: 900;
+    }
+    .shared-map-full {
+      width: 100%;
+      height: 520px;
+      border-radius: var(--radius-xl);
+      border: 2px solid var(--border-subtle);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(93, 45, 62, 0.1);
+    }
+    .guardian-quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .btn-guardian-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.95rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-decoration: none;
+      border: 1.5px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      transition: all var(--transition-fast);
+    }
+    [data-theme="dark"] .btn-guardian-action {
+      background: #3A1B28;
+    }
+    .btn-guardian-action:hover {
+      border-color: var(--c-berry-rose);
+      transform: translateY(-2px);
+    }
+    .btn-guardian-action.primary {
+      background: linear-gradient(135deg, #E04880 0%, #D03F74 60%, #5D2D3E 100%);
+      color: #FFF8F0;
+      border-color: var(--c-coral-blossom);
+      box-shadow: 0 4px 15px rgba(208, 63, 116, 0.4);
+    }
+    @media (max-width: 768px) {
+      .shared-guardian-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+      .guardian-quick-actions { grid-template-columns: 1fr; }
+      .shared-map-full { height: 380px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Disclaimer Banner -->
+  <div class="demo-disclaimer-bar" data-i18n="disclaimer_text">
+    ⚠️ Frontend Demo Mode: All alerts, GPS tracking & notifications are simulated locally.
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="navbar-wrapper">
+    <div class="container">
+      <nav class="navbar" aria-label="Shared Location Navigation">
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">
+            <img src="assets/icons/icon.png" alt="SOSafe Logo">
+          </div>
+          <span>SO<span class="brand-safe">Safe</span> <span style="font-size:0.8rem; font-weight:700; color:var(--c-coral-blossom);">• GUARDIAN PORTAL</span></span>
+        </a>
+
+        <div class="nav-controls">
+          <!-- Language Selector -->
+          <div class="lang-switcher" aria-label="Language Selector">
+            <div class="lang-icon">🌐</div>
+            <button type="button" class="lang-btn active" data-lang="en">EN</button>
+            <button type="button" class="lang-btn" data-lang="ta">தமிழ்</button>
+            <button type="button" class="lang-btn" data-lang="tanglish">Tanglish</button>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Theme">
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </button>
+
+          <a href="index.html" class="btn-secondary" style="padding:0.5rem 1.15rem; font-size:0.88rem;">
+            ← Home
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Viewer Content -->
+  <main class="container" style="padding-top:2.5rem; padding-bottom:5rem;">
+    
+    <!-- Guardian Tracking Header Card -->
+    <div class="shared-guardian-header">
+      <div>
+        <h1 style="font-size:1.65rem; font-weight:900; color:var(--text-primary);" data-i18n="loc_shared_view_title">
+          🚨 Live Emergency Tracking
+        </h1>
+        <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:0.25rem;" data-i18n="loc_shared_view_sub">
+          Active location stream transmitted from SOSafe user
+        </p>
+      </div>
+
+      <div id="sessionStatusBadgeWrap">
+        <div class="shared-badge-active" id="guardianStatusBadge">
+          <span class="live-status-pulse-dot"></span>
+          <span id="guardianStatusText" data-i18n="loc_shared_active_badge">● ACTIVE LIVE STREAM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Map View -->
+    <div id="sharedMap" class="shared-map-full"></div>
+
+    <!-- Telemetry Bar -->
+    <div class="map-telemetry-bar" style="margin-top:1rem;">
+      <div class="telemetry-item">
+        <span>📍 Coordinates:</span>
+        <span class="telemetry-val" id="sharedCoords">13.08270, 80.27070</span>
+      </div>
+      <div class="telemetry-item">
+        <span data-i18n="loc_shared_accuracy">Accuracy:</span>
+        <span class="telemetry-val" id="sharedAccuracy">±10m</span>
+      </div>
+      <div class="telemetry-item">
+        <span data-i18n="loc_shared_last_updated">Last updated:</span>
+        <span class="telemetry-val" id="sharedUpdatedTime">Live</span>
+      </div>
+    </div>
+
+    <!-- Guardian Quick Action Buttons -->
+    <div class="guardian-quick-actions">
+      <a href="#" id="btnDirectionsGoogle" target="_blank" rel="noopener" class="btn-guardian-action primary">
+        <span>🧭</span> <span>Open in Google Maps</span>
+      </a>
+      <a href="tel:112" class="btn-guardian-action" style="color:#E53935; border-color:rgba(229,57,53,0.4);">
+        <span>🚨</span> <span>Call Emergency (112)</span>
+      </a>
+      <button type="button" id="btnRefreshSession" class="btn-guardian-action">
+        <span>🔄</span> <span>Refresh GPS Stream</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Scripts -->
+  <script src="js/language.js"></script>
+  <script src="js/supabase.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Initialize Multilingual Engine
+      if (window.SOSafeLang) window.SOSafeLang.init();
+
+      // 2. Initialize Theme
+      const savedTheme = localStorage.getItem('sosafe_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+          const current = document.documentElement.getAttribute('data-theme') || 'light';
+          const next = current === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('sosafe_theme', next);
+        });
+      }
+
+      // 3. Extract Session ID from URL Query Params
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session');
+
+      const guardianStatusBadge = document.getElementById('guardianStatusBadge');
+      const guardianStatusText = document.getElementById('guardianStatusText');
+      const sharedCoordsEl = document.getElementById('sharedCoords');
+      const sharedAccuracyEl = document.getElementById('sharedAccuracy');
+      const sharedUpdatedTimeEl = document.getElementById('sharedUpdatedTime');
+      const btnDirectionsGoogle = document.getElementById('btnDirectionsGoogle');
+      const btnRefreshSession = document.getElementById('btnRefreshSession');
+
+      let map = null;
+      let marker = null;
+      let circle = null;
+
+      function updateMap(lat, lng, accuracy, isActive) {
+        if (!map) {
+          map = L.map('sharedMap', { center: [lat, lng], zoom: 16 });
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors | SOSafe Guardian Live Tracking'
+          }).addTo(map);
+
+          const pulseIcon = L.divIcon({
+            className: 'gps-pulse-marker-wrapper',
+            html: '<div class="gps-pulse-marker"></div>',
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+          });
+
+          marker = L.marker([lat, lng], { icon: pulseIcon }).addTo(map);
+          circle = L.circle([lat, lng], {
+            radius: accuracy || 15,
+            color: '#D03F74',
+            fillColor: '#F3949A',
+            fillOpacity: 0.18,
+            weight: 1.5
+          }).addTo(map);
+        } else {
+          if (marker) marker.setLatLng([lat, lng]);
+          if (circle) {
+            circle.setLatLng([lat, lng]);
+            circle.setRadius(accuracy || 15);
+          }
+          map.panTo([lat, lng], { animate: true, duration: 0.8 });
+        }
+
+        if (sharedCoordsEl) sharedCoordsEl.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        if (sharedAccuracyEl) sharedAccuracyEl.textContent = `±${Math.round(accuracy || 10)}m`;
+        if (sharedUpdatedTimeEl) sharedUpdatedTimeEl.textContent = new Date().toLocaleTimeString();
+
+        if (btnDirectionsGoogle) {
+          btnDirectionsGoogle.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        }
+
+        if (guardianStatusBadge && guardianStatusText) {
+          if (isActive) {
+            guardianStatusBadge.className = 'shared-badge-active';
+            guardianStatusText.textContent = window.SOSafeLang.t('loc_shared_active_badge');
+          } else {
+            guardianStatusBadge.className = 'shared-badge-inactive';
+            guardianStatusText.textContent = window.SOSafeLang.t('loc_shared_inactive_badge');
+          }
+        }
+      }
+
+      async function fetchSession() {
+        if (!sessionId) {
+          updateMap(13.0827, 80.2707, 15, true);
+          return;
+        }
+
+        const res = await window.SOSafeDB.getLiveLocationSession(sessionId);
+        if (res.success && res.session) {
+          const s = res.session;
+          updateMap(s.latitude, s.longitude, s.accuracy, s.is_active);
+        } else {
+          updateMap(13.0827, 80.2707, 15, false);
+        }
+      }
+
+      if (btnRefreshSession) {
+        btnRefreshSession.addEventListener('click', fetchSession);
+      }
+
+      // Initial Fetch
+      await fetchSession();
+
+      // Subscribe to Realtime Updates
+      if (sessionId) {
+        window.SOSafeDB.subscribeToLiveLocation(sessionId, (updatedSession) => {
+          if (updatedSession) {
+            updateMap(updatedSession.latitude, updatedSession.longitude, updatedSession.accuracy, updatedSession.is_active);
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

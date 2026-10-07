@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - SOSafe</title>
+  <meta name="description" content="Manage your personal profile and safety preferences.">
+  
+  <!-- Favicon / PNG Icon -->
+  <link rel="icon" type="image/png" href="assets/icons/icon.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-512.png">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Disclaimer Banner -->
+  <div class="demo-disclaimer-bar" data-i18n="disclaimer_text">
+    ⚠️ Frontend Demo Mode: All alerts, GPS tracking & notifications are simulated locally.
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="navbar-wrapper">
+    <div class="container">
+      <nav class="navbar" aria-label="Profile Navigation">
+        
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">
+            <img src="assets/icons/icon.png" alt="SOSafe Logo">
+          </div>
+          <span>SO<span class="brand-safe">Safe</span></span>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link" data-i18n="nav_home">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link" data-i18n="nav_dashboard">Dashboard</a></li>
+          <li><a href="location.html" class="nav-link" data-i18n="nav_location">Live Location</a></li>
+          <li><a href="contacts.html" class="nav-link" data-i18n="nav_contacts">Emergency Contacts</a></li>
+          <li><a href="profile.html" class="nav-link active" data-i18n="nav_profile">Profile</a></li>
+          <li><a href="settings.html" class="nav-link" data-i18n="nav_settings">Settings</a></li>
+        </ul>
+
+        <div class="nav-controls">
+          <!-- Language Selector -->
+          <div class="lang-switcher" aria-label="Language Selector">
+            <div class="lang-icon">🌐</div>
+            <button type="button" class="lang-btn active" data-lang="en">EN</button>
+            <button type="button" class="lang-btn" data-lang="ta">தமிழ்</button>
+            <button type="button" class="lang-btn" data-lang="tanglish">Tanglish</button>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Theme">
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </button>
+
+          <!-- User Avatar & Logout -->
+          <div class="nav-user-profile">
+            <div class="user-avatar-badge" id="navUserAvatar">U</div>
+            <span id="navUserName" style="font-size:0.9rem; font-weight:700; color:#FFF8F0; display:none;">User</span>
+            <button type="button" class="btn-logout" id="btnLogout" data-i18n="nav_logout">Logout</button>
+          </div>
+
+          <button type="button" class="menu-toggle-btn" id="menuToggleBtn" aria-label="Open Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+        </div>
+
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay">
+    <div class="mobile-nav-drawer">
+      <ul class="mobile-nav-links">
+        <li><a href="index.html" class="mobile-nav-link" data-i18n="nav_home">Home</a></li>
+        <li><a href="dashboard.html" class="mobile-nav-link" data-i18n="nav_dashboard">Dashboard</a></li>
+        <li><a href="location.html" class="mobile-nav-link" data-i18n="nav_location">Live Location</a></li>
+        <li><a href="contacts.html" class="mobile-nav-link" data-i18n="nav_contacts">Emergency Contacts</a></li>
+        <li><a href="profile.html" class="mobile-nav-link active" data-i18n="nav_profile">Profile</a></li>
+        <li><a href="settings.html" class="mobile-nav-link" data-i18n="nav_settings">Settings</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Profile Content -->
+  <main class="container" style="padding-top:2.5rem; padding-bottom:5rem;">
+    
+    <div class="page-header-wrap">
+      <h1 class="page-title" data-i18n="profile_title">My Profile</h1>
+      <p class="page-subtitle" data-i18n="profile_sub">Manage your personal information and guardian credentials</p>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-avatar-wrap" style="display:flex; flex-direction:column; align-items:center;">
+        <div class="profile-avatar-large" id="profileAvatarLarge" style="position:relative; width:96px; height:96px; border-radius:50%; border:3px solid var(--c-coral-blossom); display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; background:var(--c-deep-plum); color:#FFF8F0; font-size:2.2rem; font-weight:900; box-shadow:0 0 20px rgba(208,63,116,0.35);" title="Click to upload PNG or JPG icon">
+          <span id="profileAvatarInitial">U</span>
+          <img id="profileAvatarImg" src="" alt="Profile Icon" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+        </div>
+        
+        <input type="file" id="profileAvatarFileInput" accept=".png, .jpg, .jpeg, .webp, image/png, image/jpeg" style="display:none;">
+        
+        <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+          <button type="button" class="btn-secondary" id="btnUploadAvatar" style="font-size:0.82rem; padding:0.4rem 0.95rem; display:inline-flex; align-items:center; gap:0.4rem;">
+            <span>📷</span> Upload Icon (PNG/JPG)
+          </button>
+          <button type="button" class="btn-secondary" id="btnRemoveAvatar" style="font-size:0.82rem; padding:0.4rem 0.75rem; display:none; color:#E53935; border-color:rgba(229,57,53,0.3);">
+            ✕ Remove
+          </button>
+        </div>
+
+        <h2 id="profileNameDisplay" style="font-size:1.6rem; font-weight:900; margin:0.85rem 0 0.25rem;">User Name</h2>
+        <span id="profileEmailDisplay" style="color:var(--text-secondary); font-size:0.95rem;">user@example.com</span>
+      </div>
+
+      <form id="profileForm" style="display:flex; flex-direction:column; gap:1.35rem;">
+        <div class="form-group">
+          <label class="form-label" for="profileFullName" data-i18n="auth_label_name">Full Name</label>
+          <input type="text" id="profileFullName" class="chamber-input" style="border:1.5px solid var(--border-subtle); border-radius:var(--radius-md); padding:0.85rem 1rem; width:100%; background:var(--bg-surface);" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="profilePhone" data-i18n="auth_label_phone">Phone Number</label>
+          <input type="tel" id="profilePhone" class="chamber-input" style="border:1.5px solid var(--border-subtle); border-radius:var(--radius-md); padding:0.85rem 1rem; width:100%; background:var(--bg-surface);" placeholder="+91 98765 43210">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="profileMedical">Medical / Emergency Notes (Optional)</label>
+          <textarea id="profileMedical" class="chamber-input" style="border:1.5px solid var(--border-subtle); border-radius:var(--radius-md); padding:0.85rem 1rem; width:100%; min-height:90px; background:var(--bg-surface);" placeholder="e.g. Blood Group O+, Asthma, Allergies"></textarea>
+        </div>
+
+        <div class="profile-actions-bar" style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+          <button type="submit" class="btn-save-contact-submit" id="btnSaveProfile" style="padding:0.85rem 1.75rem;">
+            💾 Save Profile Details
+          </button>
+          <a href="contacts.html?step=2" class="btn-secondary" id="btnNextToContacts" style="padding:0.85rem 1.5rem; text-decoration:none; font-weight:700;">
+            Next: Add Contacts (Min 2) ➔
+          </a>
+        </div>
+      </form>
+    </div>
+
+  </main>
+
+  <div class="toast-notice" id="profileToast"></div>
+
+  <!-- Scripts -->
+  <script src="js/language.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

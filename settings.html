@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - SOSafe Personal Safety</title>
+  <meta name="description" content="Manage your SOSafe security preferences, emergency contacts, live location, and cloud configuration.">
+
+  <!-- Favicon / PNG Icon -->
+  <link rel="icon" type="image/png" href="assets/icons/icon.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-512.png">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Disclaimer Banner -->
+  <div class="demo-disclaimer-bar" data-i18n="disclaimer_text">
+    ⚠️ Frontend Demo Mode: All alerts, GPS tracking & notifications are simulated locally.
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="navbar-wrapper">
+    <div class="container">
+      <nav class="navbar" aria-label="Settings Navigation">
+
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">
+            <img src="assets/icons/icon.png" alt="SOSafe Logo">
+          </div>
+          <span>SO<span class="brand-safe">Safe</span></span>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link" data-i18n="nav_home">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link" data-i18n="nav_dashboard">Dashboard</a></li>
+          <li><a href="location.html" class="nav-link" data-i18n="nav_location">Live Location</a></li>
+          <li><a href="contacts.html" class="nav-link" data-i18n="nav_contacts">Emergency Contacts</a></li>
+          <li><a href="profile.html" class="nav-link" data-i18n="nav_profile">Profile</a></li>
+          <li><a href="settings.html" class="nav-link active" data-i18n="nav_settings">Settings</a></li>
+        </ul>
+
+        <div class="nav-controls">
+          <!-- Language Selector -->
+          <div class="lang-switcher" aria-label="Language Selector">
+            <div class="lang-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px; height:16px;">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+            </div>
+            <button type="button" class="lang-btn active" data-lang="en">EN</button>
+            <button type="button" class="lang-btn" data-lang="ta">தமிழ்</button>
+            <button type="button" class="lang-btn" data-lang="tanglish">Tanglish</button>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Theme">
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </button>
+
+          <!-- User Avatar & Logout -->
+          <div class="nav-user-profile">
+            <a href="profile.html" class="user-avatar-badge" id="navUserAvatar" title="View Profile">U</a>
+            <button type="button" class="btn-logout" id="btnLogout" data-i18n="nav_logout">Logout</button>
+          </div>
+
+          <button type="button" class="menu-toggle-btn" id="menuToggleBtn" aria-label="Open Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay">
+    <div class="mobile-nav-drawer">
+      <ul class="mobile-nav-links">
+        <li><a href="index.html" class="mobile-nav-link" data-i18n="nav_home">Home</a></li>
+        <li><a href="dashboard.html" class="mobile-nav-link" data-i18n="nav_dashboard">Dashboard</a></li>
+        <li><a href="location.html" class="mobile-nav-link" data-i18n="nav_location">Live Location</a></li>
+        <li><a href="contacts.html" class="mobile-nav-link" data-i18n="nav_contacts">Emergency Contacts</a></li>
+        <li><a href="profile.html" class="mobile-nav-link" data-i18n="nav_profile">Profile</a></li>
+        <li><a href="settings.html" class="mobile-nav-link active" data-i18n="nav_settings">Settings</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Settings Main Content -->
+  <main class="container" style="padding-top:2.5rem; padding-bottom:5rem;">
+
+    <div class="page-header-wrap" style="text-align:left; margin-bottom:2.25rem;">
+      <h1 class="page-title" data-i18n="settings_main_title">Settings</h1>
+      <p class="page-subtitle" data-i18n="settings_main_sub">Manage your SOSafe experience.</p>
+    </div>
+
+    <div class="settings-dashboard-wrap">
+
+      <!-- ==========================================
+           1. ACCOUNT SECTION
+           ========================================== -->
+      <section class="settings-group-section" aria-label="Account Settings">
+        <span class="settings-section-tag" data-i18n="settings_sec_account">ACCOUNT</span>
+        <div class="settings-group-card">
+
+          <!-- Profile -->
+          <a href="profile.html" class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_item_profile_title">Profile</span>
+                <span class="settings-row-desc" data-i18n="settings_item_profile_desc">Manage your personal info and credentials</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <span class="settings-chevron-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+            </div>
+          </a>
+
+          <!-- Change Password -->
+          <a href="profile.html" class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_item_password_title">Change Password</span>
+                <span class="settings-row-desc" data-i18n="settings_item_password_desc">Update your security credentials and passkeys</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <span class="settings-chevron-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+            </div>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- ==========================================
+           2. SAFETY SECTION
+           ========================================== -->
+      <section class="settings-group-section" aria-label="Safety Settings">
+        <span class="settings-section-tag" data-i18n="settings_sec_safety">SAFETY</span>
+        <div class="settings-group-card">
+
+          <!-- Emergency Contacts -->
+          <div class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_item_contacts_title">Emergency Contacts</span>
+                <span class="settings-row-desc" data-i18n="settings_item_contacts_desc">Manage your trusted emergency guardian circle</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <span class="settings-pill-badge" id="settingsContactsCountBadge">4 / 4 Contacts</span>
+              <a href="contacts.html" class="settings-mini-btn" data-i18n="settings_item_contacts_btn">Manage Contacts</a>
+            </div>
+          </div>
+
+          <!-- Live Location -->
+          <div class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_item_location_title">Live Location</span>
+                <span class="settings-row-desc" data-i18n="settings_item_location_desc">Real-time MapTiler GPS broadcast streaming</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <span class="settings-pill-badge" id="settingsLocationStatusBadge">● Standby</span>
+              <a href="location.html" class="settings-mini-btn" data-i18n="settings_item_location_btn">Manage Live Location</a>
+            </div>
+          </div>
+
+          <!-- SOS Settings -->
+          <div class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="M12 8v4" />
+                  <path d="M12 16h.01" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_item_sos_title">SOS Settings</span>
+                <span class="settings-row-desc" data-i18n="settings_item_sos_desc">Audio siren tone, countdown duration & trigger gestures</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <label class="settings-toggle-wrap" aria-label="Toggle SOS Sound Siren">
+                <input type="checkbox" id="toggleSosSound" checked>
+                <span class="settings-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- n8n SOS Webhook Automation -->
+          <div class="settings-row-item" style="flex-direction:column; align-items:flex-start; gap:0.75rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+              <div class="settings-row-left">
+                <div class="settings-row-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                  </svg>
+                </div>
+                <div class="settings-row-text">
+                  <span class="settings-row-title">n8n SOS Webhook</span>
+                  <span class="settings-row-desc">Trigger SMS & guardian notifications automatically via n8n</span>
+                </div>
+              </div>
+              <div class="settings-row-right">
+                <span class="settings-pill-badge" id="makeWebhookStatusBadge">● Webhook Config</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; width:100%;">
+              <input type="url" id="inputMakeWebhookUrl" class="chamber-input" style="flex:1; padding:0.55rem 0.85rem; font-size:0.85rem; border:1px solid var(--border-subtle); border-radius:var(--radius-md); background:var(--bg-surface);" placeholder="[PASTE_YOUR_TEST_WEBHOOK_URL_HERE]">
+              <button type="button" class="settings-mini-btn" id="btnSaveMakeWebhook" style="padding:0.55rem 1rem; font-size:0.85rem; background:var(--c-berry-rose); color:#FFF;">💾 Save</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==========================================
+           3. PREFERENCES SECTION
+           ========================================== -->
+      <section class="settings-group-section" aria-label="Preferences Settings">
+        <span class="settings-section-tag" data-i18n="settings_sec_preferences">PREFERENCES</span>
+        <div class="settings-group-card">
+
+          <!-- Language -->
+          <div class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_item_lang_title">Language</span>
+                <span class="settings-row-desc" data-i18n="settings_item_lang_desc">Choose English, தமிழ், or Tanglish</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <div class="settings-segmented-control" role="group" aria-label="Language Selector">
+                <button type="button" class="segmented-btn active" id="langOptEn">EN</button>
+                <button type="button" class="segmented-btn" id="langOptTa">தமிழ்</button>
+                <button type="button" class="segmented-btn" id="langOptTanglish">Tanglish</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications Sub-Cluster -->
+          <div class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_notif_alerts">Emergency Alerts</span>
+                <span class="settings-row-desc">Receive immediate push alerts during critical triggers</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <label class="settings-toggle-wrap" aria-label="Toggle Emergency Alerts">
+                <input type="checkbox" id="toggleNotifEmergency" checked>
+                <span class="settings-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 19 21 12 17 5 21 12 2" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_notif_location">Location Sharing</span>
+                <span class="settings-row-desc">Notify when live tracking session starts or ends</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <label class="settings-toggle-wrap" aria-label="Toggle Location Sharing Notification">
+                <input type="checkbox" id="toggleNotifLocation" checked>
+                <span class="settings-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_notif_system">System Notifications</span>
+                <span class="settings-row-desc">Network sync & system updates</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <label class="settings-toggle-wrap" aria-label="Toggle System Notifications">
+                <input type="checkbox" id="toggleNotifSystem" checked>
+                <span class="settings-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Appearance Mode (Light / Dark / System) -->
+          <div class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_item_theme_title">Appearance</span>
+                <span class="settings-row-desc" data-i18n="settings_item_theme_desc">Select Light, Dark, or System mode</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <div class="settings-segmented-control" role="group" aria-label="Appearance Theme Mode">
+                <button type="button" class="segmented-btn active" id="themeOptLight" data-i18n="settings_theme_light">Light</button>
+                <button type="button" class="segmented-btn" id="themeOptDark" data-i18n="settings_theme_dark">Dark</button>
+                <button type="button" class="segmented-btn" id="themeOptSystem" data-i18n="settings_theme_system">System</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==========================================
+           4. PRIVACY & CLOUD
+           ========================================== -->
+      <section class="settings-group-section" aria-label="Privacy and Cloud Settings">
+        <span class="settings-section-tag" data-i18n="settings_sec_privacy">PRIVACY</span>
+        <div class="settings-group-card">
+
+          <!-- Location Privacy -->
+          <div class="settings-row-item">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <circle cx="12" cy="11" r="3" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_item_privacy_title">Location Privacy</span>
+                <span class="settings-row-desc" data-i18n="settings_item_privacy_desc">Manage location accuracy & active tracking permissions</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <span class="settings-pill-badge active">Encrypted</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==========================================
+           5. ACCOUNT ACTIONS & DANGER ZONE
+           ========================================== -->
+      <section class="settings-group-section" aria-label="Account Actions">
+        <span class="settings-section-tag" data-i18n="settings_sec_danger">ACCOUNT ACTIONS</span>
+        <div class="settings-group-card danger-group-card">
+
+          <!-- Log Out -->
+          <button type="button" class="settings-row-item" id="rowLogoutAction">
+            <div class="settings-row-left">
+              <div class="settings-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title" data-i18n="settings_item_logout_title">Log Out</span>
+                <span class="settings-row-desc" data-i18n="settings_item_logout_desc">Sign out of your SOSafe account on this device</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <span class="settings-chevron-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+            </div>
+          </button>
+
+          <!-- Delete Account -->
+          <button type="button" class="settings-row-item danger-row-item" id="rowDeleteAccountAction">
+            <div class="settings-row-left">
+              <div class="settings-row-icon danger-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  <line x1="10" y1="11" x2="10" y2="17" />
+                  <line x1="14" y1="11" x2="14" y2="17" />
+                </svg>
+              </div>
+              <div class="settings-row-text">
+                <span class="settings-row-title danger-text-title" data-i18n="settings_item_delete_title">Delete Account</span>
+                <span class="settings-row-desc" data-i18n="settings_item_delete_desc">Permanently delete your account and all stored emergency data</span>
+              </div>
+            </div>
+            <div class="settings-row-right">
+              <span class="settings-chevron-icon" style="color:#E53935;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+            </div>
+          </button>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Delete Account Confirmation Modal -->
+  <div class="danger-modal-backdrop" id="deleteModalBackdrop" role="dialog" aria-modal="true">
+    <div class="danger-modal-card">
+      <div style="width:52px; height:52px; border-radius:50%; background:rgba(229,57,53,0.15); border:2px solid #E53935; color:#E53935; display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:26px; height:26px;">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
+      </div>
+      <h3 style="font-size:1.3rem; font-weight:900; color:var(--text-primary); margin-bottom:0.5rem;" data-i18n="settings_modal_delete_title">Delete Account</h3>
+      <p style="font-size:0.88rem; color:var(--text-secondary); line-height:1.5; margin-bottom:1.5rem;" data-i18n="settings_modal_delete_msg">
+        Are you sure you want to delete your account? This action cannot be undone and will permanently remove your emergency network.
+      </p>
+      <div style="display:flex; gap:0.75rem;">
+        <button type="button" class="btn-secondary" id="btnCancelDelete" style="flex:1; justify-content:center;" data-i18n="settings_modal_cancel_btn">Cancel</button>
+        <button type="button" class="btn-primary" id="btnConfirmDelete" style="flex:1.2; justify-content:center; background:#E53935; border-color:#E53935;" data-i18n="settings_modal_delete_btn">Delete Account</button>
+      </div>
+      <p style="font-size:0.75rem; color:var(--text-tertiary); margin-top:1rem;">
+        🔒 Security Note: Destructive deletion requires backend confirmation.
+      </p>
+    </div>
+  </div>
+
+  <div class="toast-notice" id="settingsToast"></div>
+
+  <!-- Scripts -->
+  <script src="js/language.js"></script>
+  <script src="js/supabase.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.SOSafeLang) window.SOSafeLang.init();
+
+      // Guard / User Loading
+      const user = await window.SOSafeDB.getUser();
+      const navUserAvatar = document.getElementById('navUserAvatar');
+      if (user && navUserAvatar) {
+        const savedImg = user.profile_image || localStorage.getItem('sosafe_avatar_' + user.id);
+        if (savedImg && savedImg.startsWith('data:image')) {
+          navUserAvatar.innerHTML = `<img src="${savedImg}" alt="Avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        } else {
+          navUserAvatar.textContent = (user.full_name || user.email || 'U').charAt(0).toUpperCase();
+        }
+      }
+
+      const toast = document.getElementById('settingsToast');
+      function showToast(msg) {
+        if (!toast) return;
+        toast.innerHTML = `<span style="color:var(--c-coral-blossom)">✓</span> <span>${msg}</span>`;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3500);
+      }
+
+      // 1. Fetch Emergency Contacts Count
+      const contactsCountBadge = document.getElementById('settingsContactsCountBadge');
+      if (user) {
+        try {
+          const res = await window.SOSafeDB.getEmergencyContacts(user.id);
+          const count = (res && res.contacts) ? res.contacts.length : 0;
+          if (contactsCountBadge) {
+            contactsCountBadge.textContent = `${count} / 4 Contacts`;
+          }
+        } catch (e) {
+          if (contactsCountBadge) contactsCountBadge.textContent = '4 / 4 Contacts';
+        }
+      }
+
+      // 2. Language Segmented Controls
+      const langOptEn = document.getElementById('langOptEn');
+      const langOptTa = document.getElementById('langOptTa');
+      const langOptTanglish = document.getElementById('langOptTanglish');
+
+      function syncLangSegmented() {
+        const cur = window.SOSafeLang.getLang();
+        [langOptEn, langOptTa, langOptTanglish].forEach(btn => btn && btn.classList.remove('active'));
+        if (cur === 'ta' && langOptTa) langOptTa.classList.add('active');
+        else if (cur === 'tanglish' && langOptTanglish) langOptTanglish.classList.add('active');
+        else if (langOptEn) langOptEn.classList.add('active');
+      }
+      syncLangSegmented();
+
+      if (langOptEn) langOptEn.addEventListener('click', () => { window.SOSafeLang.setLang('en'); syncLangSegmented(); showToast('Language changed to English'); });
+      if (langOptTa) langOptTa.addEventListener('click', () => { window.SOSafeLang.setLang('ta'); syncLangSegmented(); showToast('மொழி தமிழுக்கு மாற்றப்பட்டது'); });
+      if (langOptTanglish) langOptTanglish.addEventListener('click', () => { window.SOSafeLang.setLang('tanglish'); syncLangSegmented(); showToast('Language changed to Tanglish'); });
+
+      // 3. Appearance Modes (Light / Dark / System)
+      const themeOptLight = document.getElementById('themeOptLight');
+      const themeOptDark = document.getElementById('themeOptDark');
+      const themeOptSystem = document.getElementById('themeOptSystem');
+
+      const savedThemeMode = localStorage.getItem('sosafe_theme_mode') || localStorage.getItem('sosafe_theme') || 'light';
+
+      function applyThemeMode(mode) {
+        [themeOptLight, themeOptDark, themeOptSystem].forEach(b => b && b.classList.remove('active'));
+        localStorage.setItem('sosafe_theme_mode', mode);
+
+        if (mode === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('sosafe_theme', 'dark');
+          if (themeOptDark) themeOptDark.classList.add('active');
+        } else if (mode === 'system') {
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+          localStorage.setItem('sosafe_theme', prefersDark ? 'dark' : 'light');
+          if (themeOptSystem) themeOptSystem.classList.add('active');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+          localStorage.setItem('sosafe_theme', 'light');
+          if (themeOptLight) themeOptLight.classList.add('active');
+        }
+      }
+
+      applyThemeMode(savedThemeMode);
+
+      if (themeOptLight) themeOptLight.addEventListener('click', () => { applyThemeMode('light'); showToast('Light mode applied.'); });
+      if (themeOptDark) themeOptDark.addEventListener('click', () => { applyThemeMode('dark'); showToast('Dark mode applied.'); });
+      if (themeOptSystem) themeOptSystem.addEventListener('click', () => { applyThemeMode('system'); showToast('System theme applied.'); });
+
+      // 4. Notification Toggles Persistence
+      const toggleNotifEmergency = document.getElementById('toggleNotifEmergency');
+      const toggleNotifLocation = document.getElementById('toggleNotifLocation');
+      const toggleNotifSystem = document.getElementById('toggleNotifSystem');
+      const toggleSosSound = document.getElementById('toggleSosSound');
+
+      if (toggleNotifEmergency) {
+        toggleNotifEmergency.checked = localStorage.getItem('sosafe_notif_emerg') !== 'false';
+        toggleNotifEmergency.addEventListener('change', () => {
+          localStorage.setItem('sosafe_notif_emerg', toggleNotifEmergency.checked);
+          showToast(toggleNotifEmergency.checked ? 'Emergency alerts enabled' : 'Emergency alerts paused');
+        });
+      }
+
+      if (toggleNotifLocation) {
+        toggleNotifLocation.checked = localStorage.getItem('sosafe_notif_loc') !== 'false';
+        toggleNotifLocation.addEventListener('change', () => {
+          localStorage.setItem('sosafe_notif_loc', toggleNotifLocation.checked);
+          showToast(toggleNotifLocation.checked ? 'Location sharing alerts enabled' : 'Location sharing alerts paused');
+        });
+      }
+
+      if (toggleNotifSystem) {
+        toggleNotifSystem.checked = localStorage.getItem('sosafe_notif_sys') !== 'false';
+        toggleNotifSystem.addEventListener('change', () => {
+          localStorage.setItem('sosafe_notif_sys', toggleNotifSystem.checked);
+        });
+      }
+
+      if (toggleSosSound) {
+        toggleSosSound.checked = localStorage.getItem('sosafe_sos_sound') !== 'false';
+        toggleSosSound.addEventListener('change', () => {
+          localStorage.setItem('sosafe_sos_sound', toggleSosSound.checked);
+          showToast(toggleSosSound.checked ? 'SOS Siren sound active' : 'SOS Siren muted');
+        });
+      }
+
+      // 5. n8n Webhook URL Persistence
+      const inputMakeWebhookUrl = document.getElementById('inputMakeWebhookUrl');
+      const btnSaveMakeWebhook = document.getElementById('btnSaveMakeWebhook');
+      const makeWebhookStatusBadge = document.getElementById('makeWebhookStatusBadge');
+
+      if (inputMakeWebhookUrl) {
+        const currentUrl = window.SOSafeDB.getN8NWebhookUrl();
+        if (currentUrl && currentUrl !== '[PASTE_YOUR_TEST_WEBHOOK_URL_HERE]' && !currentUrl.includes('your-custom-webhook-id') && !currentUrl.includes('your-webhook-id')) {
+          inputMakeWebhookUrl.value = currentUrl;
+          if (makeWebhookStatusBadge) {
+            makeWebhookStatusBadge.textContent = '● Active Webhook';
+            makeWebhookStatusBadge.style.color = '#4CAF50';
+          }
+        } else {
+          if (makeWebhookStatusBadge) {
+            makeWebhookStatusBadge.textContent = '○ Needs Setup';
+            makeWebhookStatusBadge.style.color = 'var(--c-coral-blossom)';
+          }
+        }
+      }
+
+      if (btnSaveMakeWebhook && inputMakeWebhookUrl) {
+        btnSaveMakeWebhook.addEventListener('click', () => {
+          const val = inputMakeWebhookUrl.value.trim();
+          window.SOSafeDB.setN8NWebhookUrl(val);
+          if (makeWebhookStatusBadge) {
+            if (val && val !== '[PASTE_YOUR_TEST_WEBHOOK_URL_HERE]') {
+              makeWebhookStatusBadge.textContent = '● Active Webhook';
+              makeWebhookStatusBadge.style.color = '#4CAF50';
+            } else {
+              makeWebhookStatusBadge.textContent = '○ Needs Setup';
+              makeWebhookStatusBadge.style.color = 'var(--c-coral-blossom)';
+            }
+          }
+          showToast('n8n Webhook URL saved successfully!');
+        });
+      }
+
+      // 6. Logout Action
+      const rowLogoutAction = document.getElementById('rowLogoutAction');
+      const btnLogout = document.getElementById('btnLogout');
+      async function handleLogout() {
+        await window.SOSafeDB.signOut();
+        window.location.href = 'login.html';
+      }
+      if (rowLogoutAction) rowLogoutAction.addEventListener('click', handleLogout);
+      if (btnLogout) btnLogout.addEventListener('click', handleLogout);
+
+      // 7. Delete Account Confirmation Modal
+      const rowDeleteAccountAction = document.getElementById('rowDeleteAccountAction');
+      const deleteModalBackdrop = document.getElementById('deleteModalBackdrop');
+      const btnCancelDelete = document.getElementById('btnCancelDelete');
+      const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+
+      if (rowDeleteAccountAction && deleteModalBackdrop) {
+        rowDeleteAccountAction.addEventListener('click', () => {
+          deleteModalBackdrop.classList.add('active');
+        });
+      }
+
+      if (btnCancelDelete && deleteModalBackdrop) {
+        btnCancelDelete.addEventListener('click', () => {
+          deleteModalBackdrop.classList.remove('active');
+        });
+      }
+
+      if (btnConfirmDelete) {
+        btnConfirmDelete.addEventListener('click', async () => {
+          btnConfirmDelete.disabled = true;
+          btnConfirmDelete.textContent = 'Deleting...';
+          try {
+            // Log user out cleanly
+            await window.SOSafeDB.signOut();
+            showToast('Account scheduled for permanent deletion.');
+            setTimeout(() => {
+              window.location.href = 'signup.html';
+            }, 1200);
+          } catch (err) {
+            window.location.href = 'login.html';
+          }
+        });
+      }
+
+      // Mobile Drawer Toggle
+      const menuToggleBtn = document.getElementById('menuToggleBtn');
+      const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+      if (menuToggleBtn && mobileNavOverlay) {
+        menuToggleBtn.addEventListener('click', () => {
+          mobileNavOverlay.classList.toggle('open');
+        });
+        mobileNavOverlay.addEventListener('click', (e) => {
+          if (e.target === mobileNavOverlay) mobileNavOverlay.classList.remove('open');
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

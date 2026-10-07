@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safety Dashboard - SOSafe</title>
+  <meta name="description" content="Personal emergency safety dashboard and guardian monitoring center.">
+
+  <!-- Favicon / PNG Icon -->
+  <link rel="icon" type="image/png" href="assets/icons/icon.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-512.png">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Disclaimer Banner -->
+  <div class="demo-disclaimer-bar" data-i18n="disclaimer_text">
+    ⚠️ Frontend Demo Mode: All alerts, GPS tracking & notifications are simulated locally.
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="navbar-wrapper">
+    <div class="container">
+      <nav class="navbar" aria-label="Dashboard Navigation">
+
+        <a href="index.html" class="brand-logo">
+          <div class="brand-icon">
+            <img src="assets/icons/icon.png" alt="SOSafe Logo">
+          </div>
+          <span>SO<span class="brand-safe">Safe</span></span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link" data-i18n="nav_home">Home</a></li>
+          <li><a href="dashboard.html" class="nav-link active" data-i18n="nav_dashboard">Dashboard</a></li>
+          <li><a href="location.html" class="nav-link" data-i18n="nav_location">Live Location</a></li>
+          <li><a href="contacts.html" class="nav-link" data-i18n="nav_contacts">Emergency Contacts</a></li>
+          <li><a href="profile.html" class="nav-link" data-i18n="nav_profile">Profile</a></li>
+          <li><a href="settings.html" class="nav-link" data-i18n="nav_settings">Settings</a></li>
+        </ul>
+
+        <div class="nav-controls">
+          <!-- Language Selector -->
+          <div class="lang-switcher" aria-label="Language Selector">
+            <div class="lang-icon">🌐</div>
+            <button type="button" class="lang-btn active" data-lang="en">EN</button>
+            <button type="button" class="lang-btn" data-lang="ta">தமிழ்</button>
+            <button type="button" class="lang-btn" data-lang="tanglish">Tanglish</button>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Theme">
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </button>
+
+          <!-- User Profile & Logout -->
+          <div class="nav-user-profile">
+            <a href="profile.html" class="user-avatar-badge" id="navUserAvatar" title="View Profile">U</a>
+            <span id="navUserName" style="font-size:0.9rem; font-weight:700; color:#FFF8F0; display:none;">User</span>
+            <button type="button" class="btn-logout" id="btnLogout" data-i18n="nav_logout">Logout</button>
+          </div>
+
+          <button type="button" class="menu-toggle-btn" id="menuToggleBtn" aria-label="Open Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay">
+    <div class="mobile-nav-drawer">
+      <ul class="mobile-nav-links">
+        <li><a href="index.html" class="mobile-nav-link" data-i18n="nav_home">Home</a></li>
+        <li><a href="dashboard.html" class="mobile-nav-link active" data-i18n="nav_dashboard">Dashboard</a></li>
+        <li><a href="location.html" class="mobile-nav-link" data-i18n="nav_location">Live Location</a></li>
+        <li><a href="contacts.html" class="mobile-nav-link" data-i18n="nav_contacts">Emergency Contacts</a></li>
+        <li><a href="profile.html" class="mobile-nav-link" data-i18n="nav_profile">Profile</a></li>
+        <li><a href="settings.html" class="mobile-nav-link" data-i18n="nav_settings">Settings</a></li>
+      </ul>
+      <div>
+        <a href="profile.html" class="btn-primary" style="width:100%; justify-content:center; margin-bottom:0.75rem;"
+          data-i18n="nav_profile">My Profile</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Main Content -->
+  <main class="container" style="padding-top:2.5rem; padding-bottom:5rem;">
+
+    <!-- Welcome Header Card -->
+    <div class="dash-welcome-card">
+      <div class="dash-user-meta">
+        <div class="dash-avatar-main" id="dashAvatarMain">U</div>
+        <div>
+          <h1 class="dash-welcome-title">
+            <span data-i18n="dash_welcome">Welcome</span>, <span id="dashUserName">Defender</span>!
+          </h1>
+          <p style="color:var(--text-secondary); font-size:0.95rem;" data-i18n="dash_tagline">Your personal safety
+            shield is fully active & armed.</p>
+        </div>
+      </div>
+      <div>
+        <div class="dash-safety-pill">
+          <span class="dash-status-dot"></span>
+          <span id="dashSafetyStateText">● You are Safe</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Cards Grid -->
+    <div class="dash-metrics-grid">
+      <div class="dash-metric-card">
+        <span class="metric-label" data-i18n="dash_contacts_label">👥 Emergency Contacts</span>
+        <span class="metric-number" id="dashContactsCount">0 / 4</span>
+        <span class="metric-subtext">Supabase Synced</span>
+      </div>
+
+      <div class="dash-metric-card">
+        <span class="metric-label" data-i18n="dash_status_label">🛡️ System Status</span>
+        <span class="metric-number" style="font-size:1.35rem; color:#4CAF50;">Armed</span>
+        <span class="metric-subtext">Instant Response</span>
+      </div>
+
+      <a href="location.html" class="dash-metric-card" style="text-decoration:none;">
+        <span class="metric-label" data-i18n="dash_location_label">📍 Location Beacon</span>
+        <span class="metric-number" style="font-size:1.35rem; color:var(--c-coral-blossom);">Live Ready</span>
+        <span class="metric-subtext">Tap to Broadcast →</span>
+      </a>
+
+      <div class="dash-metric-card">
+        <span class="metric-label" data-i18n="dash_alert_label">⚡ Active Alerts</span>
+        <span class="metric-number">0</span>
+        <span class="metric-subtext">No Emergencies</span>
+      </div>
+    </div>
+
+    <!-- Quick Action Cards Grid -->
+    <h2 style="font-size:1.45rem; font-weight:900; margin-bottom:1.5rem; color:var(--text-primary);"
+      data-i18n="dash_quick_actions">Quick Actions</h2>
+
+    <div class="quick-actions-grid">
+      <!-- 1. Trigger SOS -->
+      <a href="index.html#home" class="action-card sos-highlight">
+        <div class="action-icon-circle">🚨</div>
+        <div>
+          <h3>Emergency SOS</h3>
+          <p>Instant 3-second broadcast to all trusted contacts</p>
+        </div>
+      </a>
+
+      <!-- 2. Live Location Sharing -->
+      <a href="location.html" class="action-card">
+        <div class="action-icon-circle">📍</div>
+        <div>
+          <h3 data-i18n="nav_location">Live Location</h3>
+          <p>Share GPS tracking & alert emergency contacts via SMS</p>
+        </div>
+      </a>
+
+      <!-- 3. Manage Contacts -->
+      <a href="contacts.html" class="action-card">
+        <div class="action-icon-circle">👥</div>
+        <div>
+          <h3 data-i18n="nav_contacts">Emergency Contacts</h3>
+          <p>Add, edit or organize your 4 emergency contacts</p>
+        </div>
+      </a>
+
+      <!-- 4. Edit Profile -->
+      <a href="profile.html" class="action-card">
+        <div class="action-icon-circle">👤</div>
+        <div>
+          <h3 data-i18n="nav_profile">User Profile</h3>
+          <p>Update personal medical information and phone</p>
+        </div>
+      </a>
+    </div>
+
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/language.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+
+</html>
